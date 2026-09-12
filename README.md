@@ -2,13 +2,13 @@
 
 一组面向 AI Agent 协作开发的通用技能：用简短日志接续工作，用决策记录保留取舍，用与变更匹配的证据验证结果。
 
-灵感来自 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的 `.agents/notes` 和 `.agents/skills`。这里将其中可复用的工程方法重新组织为 **10 个可独立安装的技能**，去掉项目专属架构、命令和强制流程，并补充日常工作日志。技能以中文编写，不依赖某个模型、编程语言或包管理器。
+灵感来自 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的 `.agents/notes` 和 `.agents/skills`。这里提供 **9 个可独立安装的技能**。Agent Notes 保留上游同名 `dsh-archive-agent-notes` 技能及必要规范，尽量少改写，英文原文也因此保留；其他技能采用通用化整理，并补充可选的日常工作日志。不依赖某个模型、编程语言或包管理器。
 
 > 上游的 Agent Notes 主要是设计决策记录，并非每日流水。这个仓库把“今天做了什么”和“为什么这样设计”分开保存，既便于交接，也便于长期维护。
 
 ## 从这里开始
 
-先采用两个技能即可：`agent-change-journal` 记录工作结果，`agent-decision-notes` 保存有长期价值的取舍。其他技能在审查、排障或交付时按需使用。
+先采用 `dsh-archive-agent-notes` 管理决策记录及其生命周期；需要日常总结时再加上可选的 `agent-change-journal`。其他技能在审查、排障或交付时按需使用。下面的示例同时安装 Notes 和日志技能。
 
 仓库可以直接阅读或下载 ZIP 使用；私有仓库需要拥有读取权限。安装、校验工具需要 **Python 3.10+**，只使用标准库；没有 Python 也可以手动复制完整技能目录。下面先克隆并进入仓库，再从仓库根目录执行安装命令；系统只有 `python3` 时将 `python` 替换为 `python3`。
 
@@ -17,10 +17,10 @@ git clone https://github.com/kiritoko1029/agent-engineering-skills.git
 cd agent-engineering-skills
 
 # 查看将要安装的内容；默认不会写入任何文件
-python scripts/install_skills.py --target ../my-project/.agents/skills --skill agent-change-journal --skill agent-decision-notes
+python scripts/install_skills.py --target ../my-project/.agents/skills --skill agent-change-journal --skill dsh-archive-agent-notes
 
 # 确认目标正确后执行复制
-python scripts/install_skills.py --target ../my-project/.agents/skills --skill agent-change-journal --skill agent-decision-notes --apply
+python scripts/install_skills.py --target ../my-project/.agents/skills --skill agent-change-journal --skill dsh-archive-agent-notes --apply
 ```
 
 `../my-project` 是示例路径，运行前替换成你的项目；含空格的路径加引号。PowerShell 可使用相同命令。目标应是技能集合目录，而不是某个具体技能目录。
@@ -32,7 +32,7 @@ python scripts/install_skills.py --target ../my-project/.agents/skills --all
 python scripts/install_skills.py --target ../my-project/.agents/skills --all --apply
 ```
 
-安装器复制整个技能目录，包含模板和许可证。**遇到同名目标会拒绝整次安装，不会覆盖现有技能。** 升级时先比较本地改动并保留副本，手动合并或改用新的目标目录；没有自动更新、卸载或远程发布功能。
+安装器复制整个技能目录，包含模板、`references/` 中的必要规范和许可证。**遇到同名目标会拒绝整次安装，不会覆盖现有技能。** 升级时先比较本地改动并保留副本，手动合并或改用新的目标目录；没有自动更新、卸载或远程发布功能。
 
 `.agents/skills` 是本仓库采用的项目级示例路径。请按 Agent 宿主实际支持的技能搜索目录选择 `--target`；例如使用用户级 `~/.codex/skills` 时，这些技能会作用于该用户的多个项目。这里提供标准 `SKILL.md` 文件，不声称对所有宿主完成兼容测试。若宿主没有技能发现功能，直接让它读取目标 `SKILL.md`，并按需读取同目录引用的资源。
 
@@ -41,8 +41,7 @@ python scripts/install_skills.py --target ../my-project/.agents/skills --all --a
 | 技能 | 何时使用 | 主要结果 |
 | --- | --- | --- |
 | [agent-change-journal](skills/agent-change-journal/SKILL.md) | 当天总结、阶段结束、交接或恢复任务 | 实际改动、检查结果、限制与下一步 |
-| [agent-decision-notes](skills/agent-decision-notes/SKILL.md) | 有值得保留的设计选择或提议 | 问题、决策、真实备选方案与后果 |
-| [agent-note-maintenance](skills/agent-note-maintenance/SKILL.md) | 决策落地、被替代，或清理过时笔记 | 状态与事实同步、可追溯的继任或归档 |
+| [dsh-archive-agent-notes](skills/dsh-archive-agent-notes/SKILL.md) | 非平凡改动、新增 Note、审计、替代或归档决策记录 | 按上游规范记录决策、检查替代关系并维护生命周期 |
 | [agent-code-review](skills/agent-code-review/SKILL.md) | 审查指定差异、模块或变更请求 | 有触发条件和证据的可执行问题 |
 | [agent-simplify](skills/agent-simplify/SKILL.md) | 寻找可以删除或合并的复杂性 | 有实际消费者依据的简化建议或改动 |
 | [agent-verify-change](skills/agent-verify-change/SKILL.md) | 验证修改、准备提交或交付 | 与变更面相符的检查及结果说明 |
@@ -56,7 +55,7 @@ python scripts/install_skills.py --target ../my-project/.agents/skills --all --a
 ```text
 用 $agent-change-journal 总结本次修改，记录实际跑过的检查、未完成项和明天的接续入口。
 
-用 $agent-decision-notes 记录为什么重试只用于幂等读取。依据当前实现和已讨论的方案，不补造测试结果。
+用 $dsh-archive-agent-notes 及其随包规范记录为什么提议仅对幂等读取重试，并检查已有 Notes 的替代关系。未交付的方案使用 proposed，不补造测试结果。
 
 用 $agent-code-review 审查当前工作区相对 main 的改动，重点检查取消和资源释放。
 
@@ -67,9 +66,9 @@ python scripts/install_skills.py --target ../my-project/.agents/skills --all --a
 
 ## 把工作记录接入项目
 
-安装技能后，把 [AGENTS.md 片段](templates/AGENTS.fragment.md) 中适合项目的约定合入已有指令文件，**不要覆盖原文件**。技能定义如何执行；项目约定决定何时执行。只复制技能不会自动产生日报，也不会创建定时任务。
+安装技能后，把 [AGENTS.md 片段](templates/AGENTS.fragment.md) 中适合项目的约定合入已有指令文件，**不要覆盖原文件**。Agent Notes 的触发、格式和生命周期沿用随包规范；日常日志可按项目需要启用。只复制技能不会自动产生日报，也不会创建定时任务。
 
-建议目录如下；项目已有 ADR 或日志目录时沿用原目录。
+Agent Notes 使用下列生命周期与分类结构；调整项目根路径时同步相关规范和链接。工作日志可以沿用项目已有目录。
 
 ```text
 my-project/
@@ -82,36 +81,39 @@ my-project/
         ├── proposed/<category>/   # 未实施或部分实施的提议
         ├── implemented/<category>/# 已落地且仍有参考价值的决策
         ├── rejected/<category>/   # 保留拒绝原因
-        └── archived/<category>/   # 历史快照，不代表当前行为
+        └── archived/<category>/   # 永久冻结的历史快照，不代表当前行为
 ```
 
-`<category>` 按项目需要选择，例如 `architecture`、`feature`、`bug-fix`、`simplification`、`process`、`testing`；这只是建议，不是必须凑齐的分类。决策文件使用 `YYYY-MM-DD-topic.md`，日期保留首次提出时间。
+`<category>` 默认沿用上游六个分类：`architecture`、`feature`、`bug-fix`、`simplification`、`process`、`testing`。分类不是任意标签；变更分类集合必须同步规范及项目已有的分类检查。决策文件使用 `YYYY-MM-DD-topic.md`，日期保留首次提出时间。
 
 | 资料 | 回答的问题 | 更新方式 |
 | --- | --- | --- |
 | 工作日志 | 做了什么、验证了什么、还差什么？ | 一天可有多个任务小节；保留其他工作者内容 |
-| 活跃决策 | 为什么选这个方案，代价是什么？ | 同步仍有效的事实；改变决策则新建继任记录并相互链接 |
+| 活跃决策 | 为什么选这个方案，代价是什么？ | 同步仍有效的事实；改变决策则新建继任记录，检查替代关系并链接相关活跃记录 |
 | 操作与接口文档 | 现在如何使用、有哪些保证？ | 随代码行为维护 |
-| 归档决策 | 当时为何如此选择？ | 默认保留历史快照，当前修正在新记录中说明 |
+| 归档决策 | 当时为何如此选择？ | 封存后永久冻结；禁止修改正文、修复出链、移动或删除，当前修正在新记录中说明 |
 
-工作日志不抄对话，不把计划当成果，也不把“跳过检查”记成“检查通过”。设计记录不必为每次机械修改新建；已有条目能够承载同一决策时更新它。
+工作日志不抄对话，不把计划当成果，也不把“跳过检查”记成“检查通过”。**每次非平凡改动必须在同一变更中新增或更新至少一份 Agent Note**；只有纯机械或局部编辑，且不改变行为、契约、结构、流程或决策理由时才豁免。已有条目能够承载同一决策时更新它，不创建重复记录。每份新 Note 都要检查替代关系；符合条件的已实施记录在同一变更中归档，部分替代保留活跃记录并互相链接。
 
-查看 [填写后的日志示例](examples/journal/2026-09-12.md) 和它引用的 [决策示例](examples/notes/implemented/architecture/2026-09-12-read-retries.md)。两者使用虚构项目，仅展示写法；其中命令和测试数字不是本仓库的验证报告。
+归档时只能按规范搬移完整记录及其配套文件、添加归档元数据并处理活跃文档的入链，不得修改 Note 正文或核验、修复其出链。封存后永久冻结，不再编辑、翻译、重新排版、移动或删除。
+
+查看 [填写后的日志示例](examples/journal/2026-09-12.md) 和它引用的 [提议示例](examples/notes/proposed/architecture/2026-09-12-read-retries.md)。两者使用虚构项目，仅展示写法；尚未交付的方案保留为 `proposed`，其中命令和测试数字不是本仓库的验证报告。
 
 ## 推荐使用节奏
 
 1. 开始或恢复任务时，查找最近相关日志及直接引用的决策，结合当前代码确认状态。
-2. 开发中按需要调用技能；发生值得保留的设计选择时更新决策记录。
-3. 结束阶段时执行必要检查，写简短工作日志，给出具体下一步。
-4. 发现决策过时或知识重复时维护它；归档依据未来价值，不按年龄或条数清理。
+2. 开发中按需要调用技能；非平凡改动必须新增或更新 Agent Note，新增时检查替代关系。
+3. 结束阶段时执行必要检查；启用工作日志的项目写简短日志，给出具体下一步。
+4. 发现活跃决策过时或知识重复时维护它；归档依据未来价值，不按年龄或条数清理，已封存记录永久冻结。
 
-不要求一次加载全部技能，不默认运行全量测试，不强制每次 GUI 修改录制 GIF，也不要求中英双语文档。多 Agent 工作时可以按独立模块委派，但先划清写入范围，最后由负责交付的 Agent 核实真实产物。
+无需一次加载全部技能；检查范围、附属文件及文档要求按所用技能和项目规范执行。多 Agent 工作时可以按独立模块委派，但先划清写入范围，最后由负责交付的 Agent 核实真实产物。
 
 ## 仓库结构
 
 ```text
 skills/<skill-name>/SKILL.md     # 可独立安装的入口
 skills/<skill-name>/assets/     # 仅在有需要时提供的模板
+skills/<skill-name>/references/ # 随包保留的必要规范，单独安装后仍可读取
 skills/<skill-name>/LICENSE     # 单独复制技能时保留的许可
 templates/AGENTS.fragment.md    # 合入目标项目的工作约定
 examples/                      # 已填示例，明确区分虚构与真实证据

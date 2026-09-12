@@ -6,8 +6,7 @@
 
 | 通用技能 | 主要来源 | 提取的核心做法 |
 | --- | --- | --- |
-| `agent-decision-notes` | [Agent Notes 约定](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/README.md)、[implemented 约定](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/AGENTS.md) | 问题、选择、真实备选与代价；用生命周期区分计划和事实 |
-| `agent-note-maintenance` | [dsh-archive-agent-notes](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/skills/dsh-archive-agent-notes/SKILL.md)、[归档约定](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/archived/AGENTS.md) | 按未来参考价值归档，完整保留仍有用的理据，修复引用 |
+| `dsh-archive-agent-notes` | [同名上游技能](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/skills/dsh-archive-agent-notes/SKILL.md)、[Agent Notes 规范](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/README.md)、[implemented 规范](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/AGENTS.md)、[归档规范](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/archived/AGENTS.md) | 保留原技能结构与写作、替代、清理、归档规则，将必要规范随技能打包 |
 | `agent-code-review` | [dsh-code-review](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/skills/dsh-code-review/SKILL.md) | 沿真实调用路径证明触发条件与影响，不制造审查问题 |
 | `agent-simplify` | [dsh-find-simplifications](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/skills/dsh-find-simplifications/SKILL.md) | 区分实际消费者与测试，衡量删除能力的代价与净维护成本 |
 | `agent-verify-change` | [dsh-pre-push-checks](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/skills/dsh-pre-push-checks/SKILL.md)、[根 AGENTS.md](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/AGENTS.md) | 将修改映射到所需证据；不默认全量，不重复已有有效检查 |
@@ -25,17 +24,29 @@
 - [文档层级与预算](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/process/2026-07-04-doc-tiers-and-budgets.md)：先明确内容归属，避免在多个入口复制规则。
 - [具体表述与可核实事实](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/process/2026-08-09-concrete-prose-names-actors-and-recorded-facts.md)：写清主体、动作和来源，而不是用抽象词遮住缺失的事实。
 - [冻结归档](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/process/2026-07-26-frozen-agent-note-archive.md)：区分需要维护的当前事实与已经封存的历史。
-- [移除集中笔记索引](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/process/2026-07-19-remove-generated-agent-note-index.md)：避免维护可由目录和检索得到的重复清单，但不将禁止索引推广为通用规则。
+- [移除集中笔记索引](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/implemented/process/2026-07-19-remove-generated-agent-note-index.md)：沿用目录与检索作为活跃笔记清单，不另建集中索引。
 - [被拒绝的组件合并](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/rejected/simplification/2026-07-19-fold-compaction-package-split.md) 与 [待实施的变异测试](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/notes/proposed/testing/2026-06-11-mutation-testing.md)：保留状态与拒绝理由，避免后来者把未采用方案误读成当前实现。
 
-## 有意改变的约束
+## Agent Notes 的最小适配
+
+[dsh-archive-agent-notes](../skills/dsh-archive-agent-notes/SKILL.md) 保留上游名称、英文原文结构和核心语义。写作、已实施记录与归档规范放在技能自身的 `references/` 中，单独安装即可读取。上游案例保留并注明来源。
+
+| 实际适配 | 原因 |
+| --- | --- |
+| 必需规范的跨仓库相对链接改为包内链接；历史依据链接固定提交 | 单独安装后仍可读取规范与追溯依据 |
+| 英文、中文、sidecar 三件套改为正文及项目实际存在的配套文件 | 目标项目不一定维护同一套双语系统；已有配套文件仍须整体处理 |
+| 专属 `pnpm` 和哈希校验器改为项目实际校验；没有校验器时明确人工核对与限制 | 不要求使用者引入 DeepSeek 的构建系统，也不声称具备未提供的自动冻结校验 |
+
+非平凡改动必须新增或更新笔记、三种活跃状态、六种分类、标准章节、真实备选方案、同主题替代审查、完整合并前保留独特理据、按未来价值归档以及归档正文永久冻结，均保留上游规则。归档时不修正文或出链；只修活跃资料的入链。清理失去价值的 rejected 笔记仍按原规则处理，任务范围与执行权限由用户和项目决定。
+
+初版的 `agent-decision-notes` 与 `agent-note-maintenance` 两个入口由上游同名技能取代。已安装初版的项目需核对本地修改后移除旧入口，避免重复触发；安装器不会自动删除已安装目录。每日日志仍是独立补充。
+
+## 其他技能的适配
+
+其他技能保留各自已说明的通用化范围；本次只收敛 Agent Notes，不把整套仓库描述为逐字复制的上游发行版。
 
 | 上游约定或实现 | 本仓库的处理及原因 |
 | --- | --- |
-| 所有非平凡变更必须配 Agent Note | 只在存在值得保留的决策时写；普通进度由日志承载，减少重复文件 |
-| 固定分类、双语文件与 sidecar 哈希 | 分类可调整，默认单语言；已有多语言项目沿用自己的机制 |
-| 归档三文件与永久冻结校验器 | 默认保留历史快照，不附带重型封存系统；移动时修复必要引用 |
-| 拒绝或完全合并的笔记可删除 | 默认保留或提出清理建议；不把审计请求解释成删除授权 |
 | 文档模板、字数预算与等行双语 | 按读者任务组织内容，保留必要约束，不强制特定版式 |
 | 必须运行的 `pnpm` 命令和项目覆盖门槛 | 从使用者项目读取真实命令与要求，按变更选择充分证据 |
 | Cordis 插件、事件、SDK 等领域规则 | 不作为通用规则移植；需要时在项目自身规范中定义 |
