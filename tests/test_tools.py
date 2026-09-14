@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import shutil
 import subprocess
 import sys
@@ -20,11 +21,17 @@ class RepositoryToolsTests(unittest.TestCase):
             prefix="agent-skills-tests-", dir=os.environ.get("AGENT_SKILLS_TEST_TMP")
         )
         self.addCleanup(self.temporary.cleanup)
-        self.workspace = Path(self.temporary.name)
+        # macOS exposes its temp directory through /var -> /private/var.
+        # Canonicalize the fixture root before testing intentional symlinks.
+        self.workspace = Path(self.temporary.name).resolve()
         self.repo = self.workspace / "repository"
         (self.repo / "scripts").mkdir(parents=True)
         for name in ("install_skills.py", "validate_repo.py"):
             shutil.copy2(TOOLS / name, self.repo / "scripts" / name)
+        for relative in (".codex-plugin/plugin.json", ".agents/plugins/marketplace.json"):
+            target = self.repo / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(TOOLS.parent / relative, target)
         self.create_skill("alpha")
         (self.repo / "README.md").write_text("# Example repository\n", encoding="utf-8")
         self.target = self.workspace / "new-project" / ".agents" / "skills"
@@ -63,6 +70,35 @@ class RepositoryToolsTests(unittest.TestCase):
             link.symlink_to(destination, target_is_directory=directory)
         except (OSError, NotImplementedError) as exc:
             self.skipTest(f"creating symbolic links is unavailable on this host: {exc}")
+
+    def test_missing_or_invalid_plugin_metadata_fails(self) -> None:
+        for relative in (".codex-plugin/plugin.json", ".agents/plugins/marketplace.json"):
+            path = self.repo / relative
+            original = path.read_bytes()
+            for content in (None, "{", "[]"):
+                with self.subTest(relative=relative, content=content):
+                    if content is None:
+                        path.unlink()
+                    else:
+                        path.write_text(content, encoding="utf-8")
+                    result = self.validate()
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertNotIn("Traceback", result.stderr)
+            path.write_bytes(original)
+
+    def test_plugin_discovery_paths_and_identity_are_checked(self) -> None:
+        path = self.repo / ".codex-plugin/plugin.json"
+        original = json.loads(path.read_text(encoding="utf-8"))
+        for field, value in (("name", "wrong"), ("skills", "../skills/"), ("version", None)):
+            with self.subTest(field=field):
+                path.write_text(json.dumps({**original, field: value}), encoding="utf-8")
+                self.assertNotEqual(self.validate().returncode, 0)
+        path.write_text(json.dumps(original), encoding="utf-8")
+        path = self.repo / ".agents/plugins/marketplace.json"
+        market = json.loads(path.read_text(encoding="utf-8"))
+        market["plugins"][0]["source"]["path"] = "./missing"
+        path.write_text(json.dumps(market), encoding="utf-8")
+        self.assertNotEqual(self.validate().returncode, 0)
 
     def test_dry_run_prints_plan_without_creating_target_or_parents(self) -> None:
         before = {path.relative_to(self.workspace): path.read_bytes() for path in self.workspace.rglob("*") if path.is_file()}

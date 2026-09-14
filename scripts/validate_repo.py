@@ -132,9 +132,47 @@ def local_link_error(repo: Path, document: Path, destination: str) -> str | None
     return None
 
 
+def validate_codex_plugin(repo: Path) -> list[str]:
+    """Check this repository's single-plugin layout, not the full Codex schema."""
+    errors: list[str] = []
+    documents = []
+    for relative in (".codex-plugin/plugin.json", ".agents/plugins/marketplace.json"):
+        try:
+            document = json.loads((repo / relative).read_text(encoding="utf-8"))
+            if not isinstance(document, dict):
+                raise ValueError("expected a JSON object")
+            documents.append(document)
+        except (OSError, UnicodeError, ValueError) as exc:
+            errors.append(f"{relative}: {exc}")
+    if errors:
+        return errors
+    manifest, marketplace = documents
+    name = "agent-engineering-skills"
+    if manifest.get("name") != name or marketplace.get("name") != name:
+        errors.append("Codex plugin and marketplace names must be agent-engineering-skills")
+    if not isinstance(manifest.get("version"), str) or not re.fullmatch(
+        r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", manifest["version"]
+    ):
+        errors.append("Codex plugin version must be a stable major.minor.patch release")
+    if manifest.get("skills") != "./skills/" or not (repo / "skills").is_dir():
+        errors.append("Codex plugin skills must point to ./skills/")
+    for field in ("apps", "mcpServers", "hooks"):
+        if field in manifest:
+            errors.append(f"skills-only Codex plugin must not declare {field}")
+    expected = [{
+        "name": name,
+        "source": {"source": "local", "path": "./"},
+        "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+        "category": "Productivity",
+    }]
+    if marketplace.get("plugins") != expected:
+        errors.append("Codex marketplace must expose the repository root as one available local plugin")
+    return errors
+
+
 def validate_repository(repo: Path) -> list[str]:
     repo = repo.resolve()
-    errors: list[str] = []
+    errors: list[str] = validate_codex_plugin(repo)
     skills_dir = repo / "skills"
     folders = sorted(path for path in skills_dir.iterdir() if path.is_dir()) if skills_dir.is_dir() else []
     if not folders:
@@ -181,7 +219,7 @@ def main() -> int:
             print(f"ERROR: {error}")
         print(f"Validation failed: {len(errors)} issue(s).")
         return 1
-    print("Validation passed: skill metadata, explicit TODO markers, and local Markdown links.")
+    print("Validation passed: Codex plugin layout, skill metadata, explicit TODO markers, and local Markdown links.")
     return 0
 
 

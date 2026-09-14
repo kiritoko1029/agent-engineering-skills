@@ -6,6 +6,34 @@
 
 > 上游的 Agent Notes 主要是设计决策记录，并非每日流水。这个仓库把“今天做了什么”和“为什么这样设计”分开保存，既便于交接，也便于长期维护。
 
+## 作为 Codex 插件安装
+
+本仓库同时提供一个包含全部 9 个技能的 Codex 插件。仓库根目录的 `.codex-plugin/plugin.json` 声明插件，`.agents/plugins/marketplace.json` 提供仓库级插件目录；技能、模板、规范及许可证直接复用 `skills/`，无需构建或重复复制。
+
+使用支持 `codex plugin` 命令的 Codex CLI，在本仓库根目录执行：
+
+```sh
+codex plugin marketplace add .
+codex plugin add agent-engineering-skills@agent-engineering-skills
+```
+
+安装完成后新建 Codex 任务或 CLI 会话，再使用下文的 `$agent-code-review` 等技能。桌面端可在插件目录中选择 **Agent Engineering Skills** 来源并安装；如果未出现，重启应用。只需部分技能时，使用下一节的独立安装器，避免同时安装同名独立技能与整包插件。
+
+以上方式读取本地文件。维护者将本次适配提交并推送到 GitHub 后，其他用户也可以使用远程仓库安装：
+
+```sh
+codex plugin marketplace add kiritoko1029/agent-engineering-skills
+codex plugin add agent-engineering-skills@agent-engineering-skills
+```
+
+更新本地源码不会自动更新已安装缓存。发布更新时修改插件版本，更新 marketplace 来源后重新执行安装命令，并新建任务验证。卸载插件使用：
+
+```sh
+codex plugin remove agent-engineering-skills@agent-engineering-skills
+```
+
+适配依据为 [OpenAI 官方插件构建文档](https://developers.openai.com/plugins/build/plugins)中仍受支持的 Codex compatibility manifest 和仓库 marketplace 格式；本地安装验证范围见[验证记录](docs/validation.md)。
+
 ## 从这里开始
 
 先采用 `dsh-archive-agent-notes` 管理决策记录及其生命周期；需要日常总结时再加上可选的 `agent-change-journal`。其他技能在审查、排障或交付时按需使用。下面的示例同时安装 Notes 和日志技能。
@@ -111,6 +139,8 @@ my-project/
 ## 仓库结构
 
 ```text
+.codex-plugin/plugin.json      # Codex 插件声明与展示元数据
+.agents/plugins/marketplace.json # 仓库级 Codex 插件目录
 skills/<skill-name>/SKILL.md     # 可独立安装的入口
 skills/<skill-name>/assets/     # 仅在有需要时提供的模板
 skills/<skill-name>/references/ # 随包保留的必要规范，单独安装后仍可读取
@@ -131,7 +161,7 @@ python scripts/validate_repo.py
 python -m unittest discover -s tests -v
 ```
 
-校验器检查本仓库约定的 `name`、`description` 单行 frontmatter、技能目录命名和 Markdown 相对文件链接。它不是完整 YAML / Markdown 解析器，不验证网页可访问性或页面锚点，也不能证明技能在真实任务中的决策质量。
+校验器检查本仓库的单插件布局、插件与 marketplace 标识、技能发现路径，以及本仓库约定的 `name`、`description` 单行 frontmatter、技能目录命名和 Markdown 相对文件链接。它不是完整 YAML / Markdown 解析器，不验证网页可访问性或页面锚点，也不能证明技能在真实任务中的决策质量。
 
 初始版本的实际验证结果与平台限制见 [验证记录](docs/validation.md)。
 

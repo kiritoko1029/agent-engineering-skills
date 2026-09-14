@@ -29,3 +29,15 @@
 2026-09-12，用上游同名 `dsh-archive-agent-notes` 及三个随包规范替换初版两个 Notes 入口后，9 个技能通过官方格式校验，仓库相对链接和 `git diff --check` 通过。新 Notes 技能在隔离目录实际安装成功，安装后的规范引用检查通过。
 
 独立审阅对照固定版本的上游四份文件，确认非平凡改动必须记录、已交付状态、替代与清理条件、归档正文及出链不修复、永久冻结等核心语义保留。本次没有修改安装器、校验器或测试代码，没有为文档变更重复运行本地工具测试；云端检查以对应提交的 GitHub Actions 结果为准。
+
+## Codex 插件适配验证
+
+2026-09-14，macOS，`codex-cli 0.154.0`：
+
+- plugin-creator 随附的 `validate_plugin.py` 校验通过；其 PyYAML 依赖仅安装在临时虚拟环境，仓库工具仍只用标准库。
+- 使用隔离的 Codex 配置目录执行 `codex plugin marketplace add <本仓库绝对路径> --json` 和 `codex plugin add agent-engineering-skills@agent-engineering-skills --json`，两步退出码均为 0，安装版本为 `1.0.0`。未写入日常 Codex 配置或覆盖用户技能。
+- 安装缓存包含全部 9 个技能；`skills/` 下的 23 个文件逐项 SHA-256 与源码一致，包括模板、参考规范和许可证。
+- `python3 scripts/validate_repo.py` 通过；`python3 -m unittest discover -s tests -v` 的 22 项测试全部通过，无跳过；`git diff --check` 通过。
+- 首次工具测试中 5 项受 macOS `/var` 临时路径符号链接影响。测试夹具改为解析临时根目录的真实路径后通过；安装器对用户指定符号链接路径的拒绝规则未放宽，相关测试仍通过。
+
+本次实测覆盖本地 marketplace 发现、插件安装和资源完整性，未测试桌面端点击安装及新任务中的技能执行。GitHub 远程安装需先提交并推送适配文件；本次未发布远程仓库。

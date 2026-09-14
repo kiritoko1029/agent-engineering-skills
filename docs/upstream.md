@@ -60,3 +60,9 @@
 [record-browser-gif](https://github.com/deepseek-ai/deepseek-harness/blob/c291e7961a515f6d7af9304e7fd1d257929aef26/.agents/skills/record-browser-gif/SKILL.md) 依赖浏览器控制、编码与发布工具，也包含每次 GUI PR 必须录制的项目约定。本仓库不将它作为所有工程任务的通用要求；需要此能力时可另建针对目标浏览器的技能。
 
 本仓库没有搬运上游运行时代码、自动化脚本或整批历史笔记。日志、模板、安装与校验工具是为通用使用新增；[LICENSE](../LICENSE) 与 [NOTICE](../NOTICE.md) 保留归因和分发许可。
+
+## Codex 插件分发适配
+
+2026-09-14 新增的 `.codex-plugin/plugin.json`、`.agents/plugins/marketplace.json`、安装说明和插件布局校验属于本仓库的分发适配，不来自 DeepSeek Harness。格式依据 [OpenAI 官方插件构建文档](https://developers.openai.com/plugins/build/plugins)。
+
+一个插件直接打包仓库根目录的 `skills/`，marketplace 的 `source.path` 使用 `./` 指向仓库根目录；不新增技能副本，也不改变 9 个技能的名称、内容、资源引用和许可。原独立技能安装器继续适用。此适配不包含 DSH 运行时、MCP 服务或自动安装脚本。
