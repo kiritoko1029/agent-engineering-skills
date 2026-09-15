@@ -41,3 +41,11 @@
 - 首次工具测试中 5 项受 macOS `/var` 临时路径符号链接影响。测试夹具改为解析临时根目录的真实路径后通过；安装器对用户指定符号链接路径的拒绝规则未放宽，相关测试仍通过。
 
 本次实测覆盖本地 marketplace 发现、插件安装和资源完整性，未测试桌面端点击安装及新任务中的技能执行。GitHub 远程安装需先提交并推送适配文件；本次未发布远程仓库。
+
+## ZCode 插件适配验证
+
+2026-09-15，macOS，Python 3.14.7，静态验证：
+
+- `python3 scripts/validate_repo.py` 通过，包含新增的 ZCode 清单与 marketplace 结构、技能路径及版本同步校验。
+- `python3 -m unittest discover -s tests -v` 的 22 项测试全部通过，无跳过；夹具已同步复制 `.zcode-plugin/plugin.json` 与 `marketplace.json`，并覆盖清单字段错误、marketplace 来源指向缺失目录、名称不符与版本不同步的拒绝行为。
+- 本机没有可独立调用的 `zcode` 命令行，未实际执行桌面端的市场添加、插件安装、启用与技能触发；需按 README 步骤在客户端验证。GitHub 远程安装需先提交并推送适配文件，本次未发布远程仓库。

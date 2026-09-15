@@ -1,0 +1,10 @@
+{
+  "name": "agent-engineering-skills",
+  "version": "1.0.0",
+  "description": "9 个通用工程技能，覆盖工作交接、决策记录、代码审查、验证、CI 排障、性能和交付。",
+  "author": { "name": "kiritoko1029" },
+  "repository": "https://github.com/kiritoko1029/agent-engineering-skills",
+  "license": "MIT",
+  "keywords": ["agent", "skills", "code-review", "verification", "ci"],
+  "skills": "skills"
+}

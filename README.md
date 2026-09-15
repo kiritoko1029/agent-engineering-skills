@@ -34,6 +34,14 @@ codex plugin remove agent-engineering-skills@agent-engineering-skills
 
 适配依据为 [OpenAI 官方插件构建文档](https://developers.openai.com/plugins/build/plugins)中仍受支持的 Codex compatibility manifest 和仓库 marketplace 格式；本地安装验证范围见[验证记录](docs/validation.md)。
 
+## 作为 ZCode 插件安装
+
+本仓库同时是一个 ZCode 插件。根目录的 `.zcode-plugin/plugin.json` 声明插件，`marketplace.json` 提供插件目录；技能同样直接复用 `skills/`，与 Codex 整包、独立安装器互不影响。
+
+在 ZCode 桌面端打开 **设置 → 插件**，通过 **创建 → 添加插件市场** 添加本仓库根目录作为本地市场；维护者推送后也可以直接添加 GitHub 仓库 `kiritoko1029/agent-engineering-skills`。从市场安装并启用 `agent-engineering-skills` 后，9 个技能即可在会话中按需触发。发布更新时同步修改 `.zcode-plugin/plugin.json` 与 `marketplace.json` 中的版本号，再在「市场源」面板刷新市场并重新安装；ZCode 以 marketplace 中的版本判断更新，两处不同步会漏报新版。
+
+适配依据为 [ZCode 官方插件文档](https://zcode.z.ai/cn/docs/plugin)。本地已完成清单与校验器的静态验证（见[验证记录](docs/validation.md)）；桌面端的市场添加、安装、启用和技能触发需在客户端按上述步骤实际验证。
+
 ## 从这里开始
 
 先采用 `dsh-archive-agent-notes` 管理决策记录及其生命周期；需要日常总结时再加上可选的 `agent-change-journal`。其他技能在审查、排障或交付时按需使用。下面的示例同时安装 Notes 和日志技能。
@@ -139,6 +147,8 @@ my-project/
 ## 仓库结构
 
 ```text
+.zcode-plugin/plugin.json      # ZCode 插件声明
+marketplace.json               # 根目录 ZCode 插件目录
 .codex-plugin/plugin.json      # Codex 插件声明与展示元数据
 .agents/plugins/marketplace.json # 仓库级 Codex 插件目录
 skills/<skill-name>/SKILL.md     # 可独立安装的入口
@@ -161,7 +171,7 @@ python scripts/validate_repo.py
 python -m unittest discover -s tests -v
 ```
 
-校验器检查本仓库的单插件布局、插件与 marketplace 标识、技能发现路径，以及本仓库约定的 `name`、`description` 单行 frontmatter、技能目录命名和 Markdown 相对文件链接。它不是完整 YAML / Markdown 解析器，不验证网页可访问性或页面锚点，也不能证明技能在真实任务中的决策质量。
+校验器检查本仓库的 Codex 与 ZCode 单插件布局、插件与 marketplace 标识及版本同步、技能发现路径，以及本仓库约定的 `name`、`description` 单行 frontmatter、技能目录命名和 Markdown 相对文件链接。它不是完整 YAML / Markdown 解析器，不验证网页可访问性或页面锚点，也不能证明技能在真实任务中的决策质量。
 
 初始版本的实际验证结果与平台限制见 [验证记录](docs/validation.md)。
 

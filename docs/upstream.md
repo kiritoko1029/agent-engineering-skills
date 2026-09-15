@@ -66,3 +66,9 @@
 2026-09-14 新增的 `.codex-plugin/plugin.json`、`.agents/plugins/marketplace.json`、安装说明和插件布局校验属于本仓库的分发适配，不来自 DeepSeek Harness。格式依据 [OpenAI 官方插件构建文档](https://developers.openai.com/plugins/build/plugins)。
 
 一个插件直接打包仓库根目录的 `skills/`，marketplace 的 `source.path` 使用 `./` 指向仓库根目录；不新增技能副本，也不改变 9 个技能的名称、内容、资源引用和许可。原独立技能安装器继续适用。此适配不包含 DSH 运行时、MCP 服务或自动安装脚本。
+
+## ZCode 插件分发适配
+
+2026-09-15 新增的 `.zcode-plugin/plugin.json`、根目录 `marketplace.json`、安装说明和相应校验同属本仓库的分发适配，不来自 DeepSeek Harness。格式依据 [ZCode 官方插件文档](https://zcode.z.ai/cn/docs/plugin)。
+
+与 Codex 适配一致，一个插件直接打包仓库根目录的 `skills/`，marketplace 条目的 `source` 使用 `./` 指向仓库根目录，且条目版本与插件清单保持同步（ZCode 以 marketplace 版本判断更新）；不新增技能副本，也不改变 9 个技能的名称、内容、资源引用和许可。此适配不声明命令、子智能体、钩子或 MCP 服务。

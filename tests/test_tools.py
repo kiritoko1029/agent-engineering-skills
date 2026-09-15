@@ -28,7 +28,10 @@ class RepositoryToolsTests(unittest.TestCase):
         (self.repo / "scripts").mkdir(parents=True)
         for name in ("install_skills.py", "validate_repo.py"):
             shutil.copy2(TOOLS / name, self.repo / "scripts" / name)
-        for relative in (".codex-plugin/plugin.json", ".agents/plugins/marketplace.json"):
+        for relative in (
+            ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
+            ".zcode-plugin/plugin.json", "marketplace.json",
+        ):
             target = self.repo / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(TOOLS.parent / relative, target)
@@ -72,7 +75,10 @@ class RepositoryToolsTests(unittest.TestCase):
             self.skipTest(f"creating symbolic links is unavailable on this host: {exc}")
 
     def test_missing_or_invalid_plugin_metadata_fails(self) -> None:
-        for relative in (".codex-plugin/plugin.json", ".agents/plugins/marketplace.json"):
+        for relative in (
+            ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
+            ".zcode-plugin/plugin.json", "marketplace.json",
+        ):
             path = self.repo / relative
             original = path.read_bytes()
             for content in (None, "{", "[]"):
@@ -99,6 +105,25 @@ class RepositoryToolsTests(unittest.TestCase):
         market["plugins"][0]["source"]["path"] = "./missing"
         path.write_text(json.dumps(market), encoding="utf-8")
         self.assertNotEqual(self.validate().returncode, 0)
+
+        path = self.repo / ".zcode-plugin/plugin.json"
+        original = json.loads(path.read_text(encoding="utf-8"))
+        for field, value in (("name", "wrong"), ("skills", "./skills/"), ("version", None)):
+            with self.subTest(platform="zcode", field=field):
+                path.write_text(json.dumps({**original, field: value}), encoding="utf-8")
+                self.assertNotEqual(self.validate().returncode, 0)
+        path.write_text(json.dumps(original), encoding="utf-8")
+        path = self.repo / "marketplace.json"
+        market = json.loads(path.read_text(encoding="utf-8"))
+        for mutations in (
+            {"source": "./missing"},
+            {"version": "0.0.1"},
+            {"name": "wrong"},
+        ):
+            with self.subTest(platform="zcode", mutation=sorted(mutations)):
+                entry = {**market["plugins"][0], **mutations}
+                path.write_text(json.dumps({**market, "plugins": [entry]}), encoding="utf-8")
+                self.assertNotEqual(self.validate().returncode, 0)
 
     def test_dry_run_prints_plan_without_creating_target_or_parents(self) -> None:
         before = {path.relative_to(self.workspace): path.read_bytes() for path in self.workspace.rglob("*") if path.is_file()}

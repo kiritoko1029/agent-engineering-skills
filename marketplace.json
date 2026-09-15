@@ -1,0 +1,14 @@
+{
+  "name": "agent-engineering-skills",
+  "description": "Agent Engineering Skills 的 ZCode 插件目录。",
+  "plugins": [
+    {
+      "name": "agent-engineering-skills",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "9 个通用工程技能，覆盖工作交接、决策记录、代码审查、验证、CI 排障、性能和交付。",
+      "category": "Productivity",
+      "tags": ["skills", "review", "verification"]
+    }
+  ]
+}
