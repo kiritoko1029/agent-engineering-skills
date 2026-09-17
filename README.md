@@ -42,6 +42,28 @@ codex plugin remove agent-engineering-skills@agent-engineering-skills
 
 适配依据为 [ZCode 官方插件文档](https://zcode.z.ai/cn/docs/plugin)。本地已完成清单与校验器的静态验证（见[验证记录](docs/validation.md)）；桌面端的市场添加、安装、启用和技能触发需在客户端按上述步骤实际验证。
 
+## 作为 Kimi Code 插件安装
+
+仓库根目录的 `kimi.plugin.json` 将现有 `skills/` 打包为一个 Kimi Code 插件，包含全部 9 个技能及其模板、参考规范和许可证。按需加载技能，不添加会话启动注入、命令、Hooks 或 MCP 服务。
+
+在支持 Plugins 的 Kimi Code **会话输入框**中执行以下斜杠命令（不是终端 shell 命令）：
+
+```text
+/plugins install https://github.com/kiritoko1029/agent-engineering-skills/tree/main
+/reload
+/plugins info agent-engineering-skills
+```
+
+这里指定 `main`，直接安装该分支版本；也可将 `main` 换成具体提交以固定版本。若安装本地源码，把 `/plugins install` 后的 URL 换成克隆后的仓库绝对路径。安装后可以按需调用，例如：
+
+```text
+/skill:agent-code-review 审查当前工作区相对 main 的改动。
+```
+
+Kimi Code 使用托管副本，编辑本地源码不会自动更新已安装插件；更新后重新安装并执行 `/reload`。插件为用户级安装，对该 Kimi Code 用户的项目生效；避免同时独立安装同名技能。需要停用或移除时，分别运行 `/plugins disable agent-engineering-skills` 或 `/plugins remove agent-engineering-skills`，再执行 `/reload`。
+
+适配依据为 [Kimi Code 官方插件文档](https://www.kimi.com/code/docs/kimi-code-cli/customization/plugins)。本地实际安装与资源完整性验证见[验证记录](docs/validation.md)。原有 ZCode `marketplace.json` 继续用于 ZCode；Kimi 直接按仓库 URL 安装，无需额外市场文件。
+
 ## 从这里开始
 
 先采用 `dsh-archive-agent-notes` 管理决策记录及其生命周期；需要日常总结时再加上可选的 `agent-change-journal`。其他技能在审查、排障或交付时按需使用。下面的示例同时安装 Notes 和日志技能。
@@ -149,6 +171,7 @@ my-project/
 ```text
 .zcode-plugin/plugin.json      # ZCode 插件声明
 marketplace.json               # 根目录 ZCode 插件目录
+kimi.plugin.json               # Kimi Code 插件声明，复用现有 skills/
 .codex-plugin/plugin.json      # Codex 插件声明与展示元数据
 .agents/plugins/marketplace.json # 仓库级 Codex 插件目录
 skills/<skill-name>/SKILL.md     # 可独立安装的入口
@@ -171,7 +194,7 @@ python scripts/validate_repo.py
 python -m unittest discover -s tests -v
 ```
 
-校验器检查本仓库的 Codex 与 ZCode 单插件布局、插件与 marketplace 标识及版本同步、技能发现路径，以及本仓库约定的 `name`、`description` 单行 frontmatter、技能目录命名和 Markdown 相对文件链接。它不是完整 YAML / Markdown 解析器，不验证网页可访问性或页面锚点，也不能证明技能在真实任务中的决策质量。
+校验器检查本仓库的 Codex、ZCode 与 Kimi Code 单插件布局、适用的 marketplace 标识及版本同步、技能发现路径，以及本仓库约定的 `name`、`description` 单行 frontmatter、技能目录命名和 Markdown 相对文件链接。它不是完整的宿主插件 schema 或 YAML / Markdown 解析器，不验证网页可访问性或页面锚点，也不能证明技能在真实任务中的决策质量。
 
 初始版本的实际验证结果与平台限制见 [验证记录](docs/validation.md)。
 

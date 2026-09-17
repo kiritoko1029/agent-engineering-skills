@@ -72,3 +72,9 @@
 2026-09-15 新增的 `.zcode-plugin/plugin.json`、根目录 `marketplace.json`、安装说明和相应校验同属本仓库的分发适配，不来自 DeepSeek Harness。格式依据 [ZCode 官方插件文档](https://zcode.z.ai/cn/docs/plugin)。
 
 与 Codex 适配一致，一个插件直接打包仓库根目录的 `skills/`，marketplace 条目的 `source` 使用 `./` 指向仓库根目录，且条目版本与插件清单保持同步（ZCode 以 marketplace 版本判断更新）；不新增技能副本，也不改变 9 个技能的名称、内容、资源引用和许可。此适配不声明命令、子智能体、钩子或 MCP 服务。
+
+## Kimi Code 插件分发适配
+
+2026-09-17 新增的 `kimi.plugin.json`、安装说明及布局校验属于本仓库的分发适配，不来自 DeepSeek Harness。格式依据 [Kimi Code 官方插件文档](https://www.kimi.com/code/docs/kimi-code-cli/customization/plugins)。清单使用 `skills: "./skills/"` 直接复用现有 9 个技能，不改技能正文和 Agent Notes 规则；不声明会话启动自动加载、提示词注入、Hooks、命令或 MCP 服务。
+
+Kimi 使用仓库 URL 直接安装，示例指定 `/tree/main` 以选择当前分支，不新增或改写 Codex、ZCode 的 marketplace。三个平台各自读取自己的插件清单，共享同一份技能与许可文件。

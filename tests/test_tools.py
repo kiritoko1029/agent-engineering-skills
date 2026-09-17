@@ -30,7 +30,7 @@ class RepositoryToolsTests(unittest.TestCase):
             shutil.copy2(TOOLS / name, self.repo / "scripts" / name)
         for relative in (
             ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
-            ".zcode-plugin/plugin.json", "marketplace.json",
+            ".zcode-plugin/plugin.json", "marketplace.json", "kimi.plugin.json",
         ):
             target = self.repo / relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -77,7 +77,7 @@ class RepositoryToolsTests(unittest.TestCase):
     def test_missing_or_invalid_plugin_metadata_fails(self) -> None:
         for relative in (
             ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
-            ".zcode-plugin/plugin.json", "marketplace.json",
+            ".zcode-plugin/plugin.json", "marketplace.json", "kimi.plugin.json",
         ):
             path = self.repo / relative
             original = path.read_bytes()
@@ -124,6 +124,24 @@ class RepositoryToolsTests(unittest.TestCase):
                 entry = {**market["plugins"][0], **mutations}
                 path.write_text(json.dumps({**market, "plugins": [entry]}), encoding="utf-8")
                 self.assertNotEqual(self.validate().returncode, 0)
+
+    def test_kimi_plugin_requires_discoverable_skills_without_automatic_side_effects(self) -> None:
+        path = self.repo / "kimi.plugin.json"
+        original = json.loads(path.read_text(encoding="utf-8"))
+        self.assert_success(self.validate())
+        for field, value in (
+            ("name", "wrong"), ("skills", "../skills/"), ("skills", "./missing/"),
+            ("skills", None), ("version", None),
+            ("sessionStart", {"skill": "alpha"}), ("systemPrompt", "Always run alpha"),
+            ("mcpServers", {}), ("hooks", {}),
+        ):
+            with self.subTest(field=field, value=value):
+                path.write_text(json.dumps({**original, field: value}), encoding="utf-8")
+                result = self.validate()
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Kimi", result.stdout)
+        path.write_text(json.dumps(original), encoding="utf-8")
+        self.assert_success(self.validate())
 
     def test_dry_run_prints_plan_without_creating_target_or_parents(self) -> None:
         before = {path.relative_to(self.workspace): path.read_bytes() for path in self.workspace.rglob("*") if path.is_file()}

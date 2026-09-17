@@ -208,9 +208,38 @@ def validate_zcode_plugin(repo: Path) -> list[str]:
     return errors
 
 
+def validate_kimi_plugin(repo: Path) -> list[str]:
+    """Check this repository's skills-only Kimi layout, not the full Kimi schema."""
+    relative = "kimi.plugin.json"
+    try:
+        manifest = json.loads((repo / relative).read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            raise ValueError("expected a JSON object")
+    except (OSError, UnicodeError, ValueError) as exc:
+        return [f"{relative}: {exc}"]
+    errors: list[str] = []
+    if manifest.get("name") != "agent-engineering-skills":
+        errors.append("Kimi plugin name must be agent-engineering-skills")
+    if not isinstance(manifest.get("version"), str) or not re.fullmatch(
+        r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", manifest["version"]
+    ):
+        errors.append("Kimi plugin version must be a stable major.minor.patch release")
+    if manifest.get("skills") != "./skills/" or not (repo / "skills").is_dir():
+        errors.append("Kimi plugin skills must point to ./skills/")
+    for field in (
+        "commands", "agents", "hooks", "mcpServers", "sessionStart",
+        "systemPrompt", "systemPromptPath", "skillInstructions",
+    ):
+        if field in manifest:
+            errors.append(f"on-demand skills-only Kimi plugin must not declare {field}")
+    return errors
+
+
 def validate_repository(repo: Path) -> list[str]:
     repo = repo.resolve()
-    errors: list[str] = validate_codex_plugin(repo) + validate_zcode_plugin(repo)
+    errors: list[str] = (
+        validate_codex_plugin(repo) + validate_zcode_plugin(repo) + validate_kimi_plugin(repo)
+    )
     skills_dir = repo / "skills"
     folders = sorted(path for path in skills_dir.iterdir() if path.is_dir()) if skills_dir.is_dir() else []
     if not folders:
@@ -257,7 +286,7 @@ def main() -> int:
             print(f"ERROR: {error}")
         print(f"Validation failed: {len(errors)} issue(s).")
         return 1
-    print("Validation passed: Codex and ZCode plugin layouts, skill metadata, explicit TODO markers, and local Markdown links.")
+    print("Validation passed: Codex, ZCode and Kimi plugin layouts, skill metadata, explicit TODO markers, and local Markdown links.")
     return 0
 
 

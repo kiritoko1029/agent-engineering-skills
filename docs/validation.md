@@ -49,3 +49,15 @@
 - `python3 scripts/validate_repo.py` 通过，包含新增的 ZCode 清单与 marketplace 结构、技能路径及版本同步校验。
 - `python3 -m unittest discover -s tests -v` 的 22 项测试全部通过，无跳过；夹具已同步复制 `.zcode-plugin/plugin.json` 与 `marketplace.json`，并覆盖清单字段错误、marketplace 来源指向缺失目录、名称不符与版本不同步的拒绝行为。
 - 本机没有可独立调用的 `zcode` 命令行，未实际执行桌面端的市场添加、插件安装、启用与技能触发；需按 README 步骤在客户端验证。GitHub 远程安装需先提交并推送适配文件，本次未发布远程仓库。
+
+## Kimi Code 插件适配验证
+
+2026-09-17，Windows，Kimi Code 0.42.0，Python 3.14.2：
+
+- 使用独立的 `KIMI_CODE_HOME` 启动本机 `kimi web --host 127.0.0.1 --port 0 --no-open`，保留令牌鉴权。通过官方服务 API 从本地仓库安装，再读取安装列表；仅写入任务临时目录，没有修改日常 Kimi 配置。
+- 运行时返回插件 `agent-engineering-skills` 版本 `1.0.0`、`state: ok`、`enabled: true`、`skillCount: 9`、`hasErrors: false`。托管副本中 `skills/` 的 23 个文件逐项 SHA-256 与源码一致，包括模板、参考规范及许可证。验证后测试服务已退出。
+- `python scripts/validate_repo.py` 通过；工具测试 23 项中 18 项通过、5 项因 Windows 创建符号链接权限不足跳过，无测试失败。新增检查覆盖 Kimi 清单缺失或损坏、错误名称或技能路径，以及意外启用启动注入或服务的拒绝行为。
+
+首次实测安装成功，但测试脚本退出时发送了缺少 JSON 请求体的关闭请求；修正测试脚本后重跑，安装、文件核对和服务关闭均完成。该脚本只用于本地验证，不随插件分发。
+
+此验证覆盖真实运行时的本地安装、启用、技能发现及资源完整性，没有发起模型调用或验证技能执行效果，也不等同于逐项测试桌面端交互。Kimi 协议依据 [官方插件文档](https://www.kimi.com/code/docs/kimi-code-cli/customization/plugins) 与 [服务 API](https://www.kimi.com/code/docs/kimi-code-cli/reference/server-api.html)。远程检查以对应提交的 GitHub Actions 结果为准。
